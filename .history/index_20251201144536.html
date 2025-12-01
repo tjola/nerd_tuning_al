@@ -1,0 +1,64 @@
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="index.css">
+<script src="index.js"></script>
+<title>Nerd tuning AL</title>
+</head>
+<body>
+<div class="container">
+   <img src="/img/nerd_logo-removebg-preview.png" style="width: 200px;align-items: center;"> 
+
+  <!-- Shto Automjet -->
+  <div style="padding:15px; border-radius:10px; margin-bottom:20px;">
+    <h2>Klient i ri</h2>
+    <input type="text" id="clientName" placeholder="Emri i Klientit *" required>
+    <input type="text" id="clientPhone" placeholder="Numri i Telefonit">
+    <input type="text" id="carPlate" placeholder="Targa (p.sh. AA 123 BB) *" required>
+    <input type="text" id="carVin" placeholder="VIN / Numri i Shasisë (17 karaktere)">
+    <input type="text" id="carMake" placeholder="Marka">
+    <input type="text" id="carModel" placeholder="Modeli">
+    <input type="number" id="carYear" placeholder="Viti">
+    <input type="number" id="carKm" placeholder="Kilometrat aktuale (km)">
+    <button onclick="addCar()">Shto Automjet</button>
+  </div>
+
+  <!-- Regjistro Punë -->
+  <div style="padding:15px; border-radius:10px; margin-bottom:20px;">
+    <h2>Regjistro Punën e Kryer</h2>
+    <select id="workCarSelect"><option>-- Zgjidh Automjetin --</option></select>
+    <textarea id="workDescription" placeholder="Çfarë u bë? (ndërrim vaji, frena, goma...)" rows="3"></textarea>
+    <input type="number" id="workCost" placeholder="Çmimi në lekë" step="0.01">
+    <input type="number" id="workKm" placeholder="Kilometrat tani (opsionale)">
+    <input type="date" id="workDate">
+    <button onclick="addWork()">Ruaj Punën</button>
+  </div>
+
+  <!-- Lista -->
+  <div style="background:#f6ffed; padding:15px; border-radius:10px; margin-bottom:20px;">
+    <h2>Të Gjithë Automjetet</h2>
+    <div id="records">Nuk ka automjete ende...</div>
+  </div>
+
+  <!-- IMPORT / EXPORT -->
+  <div style="text-align:center; padding:20px; background:#1e293b; color:white; border-radius:10px; margin:20px 0;">
+    <h2 style="color:#fbbf24;">Import & Export të Dhënash</h2>
+    <button class="btn-green" onclick="exportData()">EXPORT (Shkarko të gjitha të dhënat)</button>
+    <button class="btn-red" onclick="document.getElementById('importFile').click()">
+      IMPORT (Ngarko nga skedar)
+    </button>
+    <input type="file" id="importFile" style="display:none" accept=".txt,.json" onchange="importData(event)">
+    <p style="margin:10px 0 0; font-size:14px;">
+      Skedari ruhet si <strong>garazh-backup-dd-mm-yyyy.txt</strong>
+    </p>
+  </div>
+</div>
+
+<div class="footer">
+  Garazh Auto © 2025 | Version për Celular | VIN + KM + Import/Export
+</div>
+
+<div align=center><a href='https://www.counter12.com'><img src='https://www.counter12.com/img-9ZdC2yDa50aBZZ10-3.gif' border='0' alt='counter'></a><script type='text/javascript' src='https://www.counter12.com/ad.js?id=9ZdC2yDa50aBZZ10'></script></div>
+</body>
+</html>

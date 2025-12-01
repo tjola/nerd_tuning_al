@@ -1,0 +1,270 @@
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nerd tuning AL</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f0f0f0; }
+  .container { max-width:100%; margin:10px; padding:15px; background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); }
+  h1 { text-align:center; color:#1e40af; margin:10px 0 15px; font-size:24px; }
+  h2 { color:#1e40af; font-size:19px; margin:20px 0 10px; }
+  input, select, textarea, button {
+    width:100%; padding:12px; margin:8px 0; font-size:16px;
+    border:1px solid #ccc; border-radius:8px; box-sizing:border-box;
+  }
+  button {
+    background:#1e40af; color:white; border:none; font-weight:bold;
+    padding:16px; margin:15px 0; font-size:18px;
+  }
+  .btn-green { background:#16a34a; }
+  .btn-red { background:#dc2626; }
+  .btn-cyan { background:#0d9488; }
+  table { width:100%; border-collapse:collapse; margin:15px 0; font-size:14px; }
+  th, td { border:1px solid #999; padding:10px; text-align:left; }
+  th { background:#1e40af; color:white; }
+  .work-item { background:#f3f4f6; padding:10px; margin:6px 0; border-radius:6px; font-size:14px; }
+  .footer { text-align:center; padding:20px; background:#1e40af; color:white; margin-top:30px; border-radius:0 0 12px 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+   <img src="/img/nerd_logo-removebg-preview.png" style="width: 200px;align-items: ;"> 
+
+  <!-- Shto Automjet -->
+  <div style="background:#f0f9ff; padding:15px; border-radius:10px; margin-bottom:20px;">
+    <h2>Shto Klient & Automjet</h2>
+    <input type="text" id="clientName" placeholder="Emri i Klientit *" required>
+    <input type="text" id="clientPhone" placeholder="Numri i Telefonit">
+    <input type="text" id="carPlate" placeholder="Targa (p.sh. AA 123 BB) *" required>
+    <input type="text" id="carVin" placeholder="VIN / Numri i Shasisë (17 karaktere)">
+    <input type="text" id="carMake" placeholder="Marka">
+    <input type="text" id="carModel" placeholder="Modeli">
+    <input type="number" id="carYear" placeholder="Viti">
+    <input type="number" id="carKm" placeholder="Kilometrat aktuale (km)">
+    <button onclick="addCar()">Shto Automjet</button>
+  </div>
+
+  <!-- Regjistro Punë -->
+  <div style="background:#fffbeb; padding:15px; border-radius:10px; margin-bottom:20px;">
+    <h2>Regjistro Punën e Kryer</h2>
+    <select id="workCarSelect"><option>-- Zgjidh Automjetin --</option></select>
+    <textarea id="workDescription" placeholder="Çfarë u bë? (ndërrim vaji, frena, goma...)" rows="3"></textarea>
+    <input type="number" id="workCost" placeholder="Çmimi në lekë" step="0.01">
+    <input type="number" id="workKm" placeholder="Kilometrat tani (opsionale)">
+    <input type="date" id="workDate">
+    <button onclick="addWork()">Ruaj Punën</button>
+  </div>
+
+  <!-- Lista -->
+  <div style="background:#f6ffed; padding:15px; border-radius:10px; margin-bottom:20px;">
+    <h2>Të Gjithë Automjetet</h2>
+    <div id="records">Nuk ka automjete ende...</div>
+  </div>
+
+  <!-- IMPORT / EXPORT -->
+  <div style="text-align:center; padding:20px; background:#1e293b; color:white; border-radius:10px; margin:20px 0;">
+    <h2 style="color:#fbbf24;">Import & Export të Dhënash</h2>
+    <button class="btn-green" onclick="exportData()">EXPORT (Shkarko të gjitha të dhënat)</button>
+    <button class="btn-red" onclick="document.getElementById('importFile').click()">
+      IMPORT (Ngarko nga skedar)
+    </button>
+    <input type="file" id="importFile" style="display:none" accept=".txt,.json" onchange="importData(event)">
+    <p style="margin:10px 0 0; font-size:14px;">
+      Skedari ruhet si <strong>garazh-backup-dd-mm-yyyy.txt</strong>
+    </p>
+  </div>
+</div>
+
+<div class="footer">
+  Garazh Auto © 2025 | Version për Celular | VIN + KM + Import/Export
+</div>
+
+<script>
+let cars = [];
+
+// Ngarko të dhënat kur hapet faqja
+window.onload = () => {
+  const saved = localStorage.getItem('garazh_v2');
+  if (saved) {
+    try { cars = JSON.parse(saved); }
+    catch(e) { console.log("Të dhëna të vjetra të dëmtuara"); }
+  }
+  displayRecords();
+  updateCarSelect();
+};
+
+// Ruaj në localStorage
+function saveData() {
+  localStorage.setItem('garazh_v2', JSON.stringify(cars));
+}
+
+// Shto automjet
+function addCar() {
+  const emri = document.getElementById('clientName').value.trim();
+  const tel = document.getElementById('clientPhone').value.trim();
+  const targa = document.getElementById('carPlate').value.trim().toUpperCase();
+  const vin = document.getElementById('carVin').value.trim().toUpperCase();
+  const km = document.getElementById('carKm').value || "0";
+
+  if (!emri || !targa) return alert("Emri dhe Targa janë të detyrueshme!");
+
+  if (cars.some(c => c.plate === targa)) return alert("Kjo targë ekziston tashmë!");
+
+  cars.push({
+    plate: targa,
+    vin: vin || "—",
+    make: document.getElementById('carMake').value.trim() || "—",
+    model: document.getElementById('carModel').value.trim() || "—",
+    year: document.getElementById('carYear').value || "—",
+    km: parseInt(km) || 0,
+    client: { name: emri, phone: tel || "—" },
+    works: []
+  });
+
+  // Pastro formën
+  "clientName clientPhone carPlate carVin carMake carModel carYear carKm".split(" ").forEach(id => 
+    document.getElementById(id).value = ""
+  );
+
+  saveData();
+  displayRecords();
+  updateCarSelect();
+  alert("Automjeti u shtua me sukses!");
+}
+
+// Shto punë
+function addWork() {
+  const targa = document.getElementById('workCarSelect').value;
+  const pershkrim = document.getElementById('workDescription').value.trim();
+  const cmimi = parseFloat(document.getElementById('workCost').value) || 0;
+  const kmTani = document.getElementById('workKm').value;
+  const data = document.getElementById('workDate').value || new Date().toISOString().split('T')[0];
+
+  if (!targa || !pershkrim) return alert("Zgjidh automjetin dhe shkruaj punën!");
+
+  const car = cars.find(c => c.plate === targa);
+  car.works.push({ 
+    date: data, 
+    description: pershkrim, 
+    cost: cmimi,
+    km: kmTani ? parseInt(kmTani) : null
+  });
+
+  // Përditëso kilometrat aktuale të makinës nëse u plotësua
+  if (kmTani) car.km = parseInt(kmTani);
+
+  document.getElementById('workDescription').value = '';
+  document.getElementById('workCost').value = '';
+  document.getElementById('workKm').value = '';
+  document.getElementById('workDate').value = '';
+
+  saveData();
+  displayRecords();
+  alert("Puna u ruajt!");
+}
+
+// Përditëso dropdown
+function updateCarSelect() {
+  const sel = document.getElementById('workCarSelect');
+  sel.innerHTML = '<option>-- Zgjidh Automjetin --</option>';
+  cars.forEach(car => {
+    const opt = new Option(`${car.plate} | ${car.vin.substring(0,8)}... | ${car.make} ${car.model} (${car.client.name})`, car.plate);
+    sel.add(opt);
+  });
+}
+
+// Shfaq tabelën
+function displayRecords() {
+  const div = document.getElementById('records');
+  if (cars.length === 0) {
+    div.innerHTML = "<p style='text-align:center; color:#666;'>Nuk ka automjete ende. Shto njërin më sipër!</p>";
+    return;
+  }
+
+  let html = '<table><tr><th>Targa</th><th>VIN</th><th>Automjeti</th><th>Klienti</th><th>KM</th><th>Puna</th><th>Total</th></tr>';
+  cars.forEach(car => {
+    const total = car.works.reduce((s,w) => s + w.cost, 0).toFixed(0);
+    let puna = car.works.length ? '' : '<em>Pa punë</em>';
+    car.works.forEach(w => {
+      const kmText = w.km ? ` (${w.km} km)` : '';
+      puna += `<div class="work-item"><strong>${w.date}</strong>: ${w.description}${kmText} — ${w.cost} lekë</div>`;
+    });
+    html += `<tr>
+      <td><strong>${car.plate}</strong></td>
+      <td>${car.vin}</td>
+      <td>${car.year} ${car.make} ${car.model}</td>
+      <td>${car.client.name}<br><small>${car.client.phone}</small></td>
+      <td>${car.km.toLocaleString()} km</td>
+      <td>${puna}</td>
+      <td><strong>${total} lekë</strong></td>
+    </tr>`;
+  });
+  html += '</table>';
+  div.innerHTML = html;
+}
+
+// EXPORT – shkarkon skedar të bukur të lexueshëm
+function exportData() {
+  let text = "GARAZH AUTO - TË DHËNAT E PLOTA\n";
+  text += "Data: " + new Date().toLocaleString('sq-AL') + "\n";
+  text += "=".repeat(50) + "\n\n";
+
+  cars.forEach((car, i) => {
+    text += `${i+1}. Targa: ${car.plate}\n`;
+    text += `   VIN: ${car.vin}\n`;
+    text += `   Automjeti: ${car.year} ${car.make} ${car.model}\n`;
+    text += `   Klienti: ${car.client.name} | ${car.client.phone}\n`;
+    text += `   Kilometrat aktuale: ${car.km.toLocaleString()} km\n`;
+    text += `   Total i paguar: ${car.works.reduce((s,w)=>s+w.cost,0)} lekë\n`;
+    text += `   Historia e punëve:\n`;
+    if (car.works.length === 0) text += "      — Ende pa punë\n";
+    else {
+      car.works.forEach(w => {
+        const km = w.km ? ` (${w.km} km)` : '';
+        text += `      • ${w.date}: ${w.description}${km} — ${w.cost} lekë\n`;
+      });
+    }
+    text += "-".repeat(40) + "\n\n";
+  });
+
+  const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const date = new Date().toLocaleDateString('sq-AL').replace(/\//g, '-');
+  a.download = `garazh-backup-${date}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  alert("Të gjitha të dhënat u shkarkuan!");
+}
+
+// IMPORT – ngarkon nga skedari
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const content = ev.target.result;
+      // Provo si JSON i vjetër
+      try {
+        cars = JSON.parse(content);
+      } catch {
+        // Nëse nuk është JSON, provo formatin e ri të lexueshëm (për momentin pranon vetëm JSON)
+        alert("Përdor vetëm skedarët e shkarkuar nga ky program!");
+        return;
+      }
+      saveData();
+      displayRecords();
+      updateCarSelect();
+      alert("Të dhënat u importuan me sukses!");
+    } catch(err) {
+      alert("Gabim: Skedari nuk është i vlefshëm!");
+    }
+  };
+  reader.readAsText(file);
+}
+</script>
+<div align=center><a href='https://www.counter12.com'><img src='https://www.counter12.com/img-9ZdC2yDa50aBZZ10-3.gif' border='0' alt='counter'></a><script type='text/javascript' src='https://www.counter12.com/ad.js?id=9ZdC2yDa50aBZZ10'></script></div>
+</body>
+</html>

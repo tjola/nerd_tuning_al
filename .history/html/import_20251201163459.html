@@ -1,0 +1,18 @@
+  <!-- Lista -->
+  <div style="background:#f6ffed; padding:15px; border-radius:10px; margin-bottom:20px;">
+    <h2>Të Gjithë Automjetet</h2>
+    <div id="records">Nuk ka automjete ende...</div>
+  </div>
+
+  <!-- IMPORT / EXPORT -->
+  <div style="text-align:center; padding:20px; background:#1e293b; color:white; border-radius:10px; margin:20px 0;">
+    <h2 style="color:#fbbf24;">Import & Export të Dhënash</h2>
+    <button class="btn-green" onclick="exportData()">EXPORT (Shkarko të gjitha të dhënat)</button>
+    <button class="btn-red" onclick="document.getElementById('importFile').click()">
+      IMPORT (Ngarko nga skedar)
+    </button>
+    <input type="file" id="importFile" style="display:none" accept=".txt,.json" onchange="importData(event)">
+    <p style="margin:10px 0 0; font-size:14px;">
+      Skedari ruhet si <strong>garazh-backup-dd-mm-yyyy.txt</strong>
+    </p>
+  </div>
